@@ -2,13 +2,12 @@
 title: "How AI Helped Me Rebuild My Blog and Move from Jekyll to Quarkus Roq"
 date: 2026-02-14 16:22:00 +0100
 description: A comprehensive journey of rebuilding a personal blog with the help of AI, moving from Jekyll to Quarkus Roq, exploring GitHub Issues Driven Development, and discovering how modern AI tools can transform the way we build and maintain websites.
-image: hero-illustration.png
+image: hero-gimp-extracted.png
 tags: blogging, ai, jekyll, quarkus-roq, github-copilot, design, migration
 author: sunix
 ---
 
 # Introduction
-
 I don't blog that often.
 
 It's not because I don't have ideas, quite the opposite. I have lots of them: ideas I want to share, experiments I want to document, things I want to remember. The real problem has always been time.
@@ -37,7 +36,6 @@ But recently, AI changed the equation.
 *This is what my blog looked like before the redesign and migration. The old Jekyll version is now archived at <a href="https://sunix.github.io/old-jekyll-blog.sunix.org/">https://sunix.github.io/old-jekyll-blog.sunix.org/</a>*
 
 # Keeping Jekyll, Redoing the Design (Without a Theme)
-
 Let's be honest: I'm not very good at design stuff.
 
 I may have ideas, but CSS and I… we don't really get along. And it's not only about CSS. Whether it's Jekyll with Ruby, or even Hugo, I only know the basics. Once you want to go a bit further, things quickly become harder, and progress slows down.
@@ -55,7 +53,6 @@ So I gave up.
 That was last summer.
 
 ## A Real Project, at the Right Time
-
 Pretty much at the same time, I got a call from my tennis club asking for help.
 
 Recently, the FFT (French Tennis Federation) shut down all CMS-based websites for many tennis clubs across France. Since I'm part of one of those clubs, I volunteered to rebuild a brand-new website from scratch.
@@ -412,7 +409,7 @@ But… it didn't work **out of the box**.
 Once I started testing things more carefully, a few problems surfaced. So I did what I now do instinctively: I created more issues.
 
 - <a href="https://github.com/sunix/blog.sunix.org/issues/63">https://github.com/sunix/blog.sunix.org/issues/63</a>  
-    Qute was interpreting `${current.class.fqn}` inside code blocks as a template expression, causing rendering failures with errors like:  
+    Qute was interpreting `$\{current.class.fqn\}` inside code blocks as a template expression, causing rendering failures with errors like:
     _Key 'current' not found_.
 - <a href="https://github.com/sunix/blog.sunix.org/issues/65">https://github.com/sunix/blog.sunix.org/issues/65</a>  
     The GitHub workflow was uploading the GitHub Pages artifact twice. The `quarkiverse/quarkus-roq@v1` action already uploads it, and the workflow tried to upload it again, causing a conflict.
@@ -673,18 +670,95 @@ Ugly 404 pages for old links.
 
 Not great.
 
-These links were already out there, on social media, in bookmarks, maybe even in other blogs or forums. Breaking them would mean losing traffic, breaking the web's link integrity, and creating a poor user experience.
+These links were already out there, on social media, in bookmarks, maybe even in other blog posts. Breaking them wasn’t acceptable.
 
-So I needed to set up **proper redirects** from the old Jekyll URLs to the new Roq URLs.
 
-Fortunately, Roq has built-in redirect support through the `redirect_from` frontmatter property. I just needed to add the old URLs to each post's metadata, and Roq would handle the rest.
+### First Attempt: The Wrong Direction
 
-This was tedious but necessary work. For each post, I had to:
+Once again, I created an issue:  
+👉 [https://github.com/sunix/blog.sunix.org/issues/80](https://github.com/sunix/blog.sunix.org/issues/80)
 
-- Find the old Jekyll URL pattern
-- Add it to the post's frontmatter
-- Test that the redirect worked
+Copilot’s first solution was to generate static HTML redirect files using a separate `Main` class.
 
-It wasn't glamorous, but it was important. And once it was done, all those old links started working again.
+Technically, it worked.
 
-The web doesn't forget. Neither should your site.
+But architecturally? I didn’t like it.
+
+It felt like stepping outside the spirit of Quarkus Roq. It introduced a custom mechanism that lived outside the framework instead of using the tools already provided by Roq.
+
+It solved the problem, but not in the right way.
+
+### The Proper Way: Plugin Aliases
+
+While researching, I discovered the **Roq plugin-aliases** feature:  
+👉 [https://iamroq.com/docs/plugins/#plugin-aliases](https://iamroq.com/docs/plugins/#plugin-aliases)
+
+That looked much cleaner.
+
+So I commented directly in the pull request:
+
+> @copilot  
+> Sorry, I don’t like the idea of going outside Quarkus Roq with an external `Main` class.  
+> Could we explore aliases instead?
+
+That was the right direction.
+
+The final implementation uses Roq’s alias mechanism properly:  
+👉 [https://github.com/sunix/blog.sunix.org/pull/83/changes](https://github.com/sunix/blog.sunix.org/pull/83/changes)
+
+Each old article now defines its legacy paths as aliases.
+
+Yes, it required updating each article to declare its old URLs.  
+But that’s actually what I wanted: explicit, controlled redirects, fully inside Roq.
+
+Clean.  
+Maintainable.  
+Aligned with the framework.
+
+# And That’s It
+
+There were other small fixes and improvements along the way.
+
+But these were the most interesting ones:
+
+- redesigning without a theme
+- using AI for mockups and iteration
+- GitHub Issues Driven Development
+- previewing PRs with `/preview`
+- migrating to Quarkus Roq
+- implementing excerpts properly
+- fixing Tailwind for production
+- handling old URL redirects cleanly
+    
+
+This whole journey wasn’t just about changing a blog engine.
+
+It was about:
+
+- reducing friction
+- owning the design
+- simplifying the stack
+- and building in small, controlled iterations
+
+AI has been a game changer in recent months. Things are moving very fast. I would never have done all of this without it.
+
+Sometimes you have ideas, and you know how something works in theory, but implementing it is slow and painful. For me, CSS is one of those areas. It’s not that I don’t understand it… it’s just time-consuming and frustrating.
+
+AI helped remove that friction.
+
+But in the end, this isn’t just something generated by a machine. I now have a design that truly fits my personality. I made the decisions. I iterated. I refined. AI was a powerful assistant, not the author.
+
+And honestly, I don’t think I would have gone this far without these tools.
+
+That’s where I am right now.
+
+If you’re considering moving to **Quarkus Roq**, or refreshing your blog design, I hope this gives you ideas, and maybe the confidence to try.
+
+You don’t need to be a designer.
+You don’t need to have weeks of free time.
+You just need a few good issues… and a couple of coffee breaks ☕🚀
+
+Last but not least, if you liked this post, feel free to leave a ⭐ on the GitHub repository of my blog [https://blog.sunix.org](https://blog.sunix.org). It helps me know the content was useful to someone 😉
+
+Happy coding.
+Happy blogging.
